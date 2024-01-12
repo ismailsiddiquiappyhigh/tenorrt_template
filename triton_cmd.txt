@@ -1,0 +1,21 @@
+CUDA 11.8
+CUddnn 8.6.0
+TensorRT v8501
+
+nvcr.io/nvidia/tritonserver:22.11-py3
+
+/usr/src/tensorrt/bin/trtexec --onnx=/opt/tritonserver/onnx/ddcolor.onnx --saveEngine=models/ddcolor/1/model.plan --verbose --useCudaGraph
+
+docker build -t esr .
+docker run -itd --name esr -p 8000:8000 -p 8001:8001 -p 8002:8002 -p 6270:6270 --shm-size 4g --gpus all esr tail -f /dev/null
+docker exec -it esr bash
+
+tritonserver --model-repository=models
+
+
+
+/usr/src/tensorrt/bin/trtexec --onnx=/opt/tritonserver/onnx/retina.onnx --saveEngine=models/retina/1/model.plan --verbose --minShapes=input:1x3x512x512 --optShapes=input:1x3x1440x1440 --maxShapes=input:1x3x1440x1440 --fp16 --useCudaGraph
+
+docker run -it -p 1410:1410 --gpus all esr 
+
+tritonserver --model-repository=models
